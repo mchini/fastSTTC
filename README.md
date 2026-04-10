@@ -4,8 +4,6 @@
 
 A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficient (STTC) for neural spike train data.
 
----
-
 ## What is STTC?
 
 STTC is a measure of how often two neurons fire close together in time. It produces a number between −1 and +1: a value near 0 means the two neurons fire independently (no more than expected by chance given their individual firing rates), 

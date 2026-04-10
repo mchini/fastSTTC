@@ -4,6 +4,8 @@
 
 A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficient (STTC) for neural spike train data.
 
+<br clear="left">
+
 ---
 
 ## What is STTC?

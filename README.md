@@ -6,7 +6,10 @@ A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficie
 
 ## What is STTC?
 
-STTC is a measure of how often two neurons fire close together in time. It produces a number between −1 and +1: a value near 0 means the two neurons fire independently (no more than expected by chance given their individual firing rates), a positive value means they tend to fire together, and a negative value means they tend to avoid firing at the same time. Unlike older measures such as the correlation index, STTC does not depend on firing rate — two neurons that both fire very rarely will not appear correlated simply because they share many silent periods. STTC was introduced by Cutts & Eglen (J. Neurosci., 2014) and has become the standard measure of pairwise spike train correlation in multi-electrode array studies.
+STTC is a measure of how often two neurons fire close together in time. It produces a number between −1 and +1: a value near 0 means the two neurons fire independently (no more than expected by chance given their individual firing rates), 
+a positive value means they tend to fire together, and a negative value means they tend to avoid firing at the same time. Unlike older measures such as the correlation index, STTC does not depend on firing rate — 
+two neurons that both fire very rarely will not appear correlated simply because they share many silent periods. STTC was introduced by Cutts & Eglen (J. Neurosci., 2014) and has 
+become a very widely used measure of pairwise spike train interactions.
 
 ---
 
@@ -14,9 +17,30 @@ STTC is a measure of how often two neurons fire close together in time. It produ
 
 - **2–9× faster** than existing NumPy implementations for short recordings (≤ 30,000 ms)
 - **1.7–2.7× faster** for long recordings (≥ 300,000 ms, 5 minutes at 1 ms bins)
-- No Neo or elephant dependency — just **NumPy and SciPy**
+- Minimal dependencies — just **NumPy and SciPy**
 - Statistical testing built in (null distribution + z-scores)
 - Simple API: **one function call per task**
+
+---
+
+## How it works — and why it is fast
+
+Most STTC implementations work by looping over every pair of units (i, j) and, for each pair, looping over every spike to count how many fall within the time window of the other unit. 
+This is slow because the work scales with the number of pairs (N²) and the number of spikes, and Python loops are expensive.
+
+`faststtc` replaces these loops with two vectorised operations that run over all units at once:
+
+1. **Cumulative-sum tiling.** To mark every time bin within ±Δt of any spike, the standard approach applies a sliding window — effectively a convolution — which requires iterating over each bin. 
+Instead, `faststtc` uses a cumulative-sum trick: compute the running total of spike counts, then subtract two offset copies of it. The result is a binary "tiled" matrix (one row per unit) that marks 
+every bin covered by at least one spike window, computed in a single vectorised pass with no Python loops.
+
+2. **Matrix multiply for all coincidences.** Once the tiled matrix is built, the number of spikes from unit A that fall inside the tiles of unit B is simply the dot product of A's spike row with B's tile row. 
+Doing this for all N² pairs simultaneously is a single matrix multiply (`spike_matrix @ tiled_matrix.T`), which NumPy hands off to a highly optimised BLAS routine. This replaces an explicit double loop over pairs.
+
+The null distribution (surrogate spike trains for statistical testing) uses a further optimisation: because the tiled version of the *original* signal does not change across surrogate iterations, 
+it is computed once before the loop rather than once per iteration. This idea was inspired by [STTCPy](https://github.com/jeremi-chabros/STTCPy), which introduced the same hoisting strategy; `faststtc` extends it to the full vectorised setting.
+
+I wrote (many years ago) the core algorithm in MATLAB. It has since been translated to Python, restructured as an installable package, and optimised with the help of Claude.
 
 ---
 
@@ -86,6 +110,22 @@ The half-window `dt` determines how close two spikes must be in time to count as
 ## Choosing `n_shifts` for the null distribution
 
 `n_shifts=200` (the default) is sufficient for exploratory analysis. Use `n_shifts >= 500` for results intended for publication to ensure the null distribution is well sampled.
+
+---
+
+## How it works — and why it is fast
+
+Most STTC implementations work by looping over every pair of units (i, j) and, for each pair, looping over every spike to count how many fall within the time window of the other unit. This is slow because the work scales with the number of pairs (N²) and the number of spikes, and Python loops are expensive.
+
+`faststtc` replaces these loops with two vectorised operations that run over all units at once:
+
+1. **Cumulative-sum tiling.** To mark every time bin within ±Δt of any spike, the standard approach applies a sliding window — effectively a convolution — which requires iterating over each bin. Instead, `faststtc` uses a cumulative-sum trick: compute the running total of spike counts, then subtract two offset copies of it. The result is a binary "tiled" matrix (one row per unit) that marks every bin covered by at least one spike window, computed in a single vectorised pass with no Python loops.
+
+2. **Matrix multiply for all coincidences.** Once the tiled matrix is built, the number of spikes from unit A that fall inside the tiles of unit B is simply the dot product of A's spike row with B's tile row. Doing this for all N² pairs simultaneously is a single matrix multiply (`spike_matrix @ tiled_matrix.T`), which NumPy hands off to a highly optimised BLAS routine. This replaces an explicit double loop over pairs.
+
+The null distribution (surrogate spike trains for statistical testing) uses a further optimisation: because the tiled version of the *original* signal does not change across surrogate iterations, it is computed once before the loop rather than once per iteration. This idea was inspired by [STTCPy](https://github.com/jeremi-chabros/STTCPy), which introduced the same hoisting strategy; `faststtc` extends it to the full vectorised setting.
+
+The core algorithm was originally written in MATLAB. It has since been translated to Python, restructured as an installable package, and optimised with the help of Claude (Anthropic).
 
 ---
 

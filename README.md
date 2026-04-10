@@ -13,8 +13,8 @@ become a very widely used measure of pairwise spike train interactions.
 
 ### Why use this package?
 
-- **2–9× faster** than existing NumPy implementations for short recordings (≤ 30,000 ms)
-- **1.7–2.7× faster** for long recordings (≥ 300,000 ms, 5 minutes at 1 ms bins)
+- **4–20× faster** than loop-based STTC algorithms (the classical implementation)
+- **1.2–5× faster** than other vectorized STTC algorithms (STTCPy)
 - Minimal dependencies — just **NumPy and SciPy**
 - Statistical testing built in (null distribution + z-scores)
 - Simple API: **one function call per task**

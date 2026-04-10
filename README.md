@@ -112,22 +112,6 @@ The half-window `dt` determines how close two spikes must be in time to count as
 
 ---
 
-### How it works — and why it is fast
-
-Most STTC implementations work by looping over every pair of units (i, j) and, for each pair, looping over every spike to count how many fall within the time window of the other unit. This is slow because the work scales with the number of pairs (N²) and the number of spikes, and Python loops are expensive.
-
-`faststtc` replaces these loops with two vectorised operations that run over all units at once:
-
-1. **Cumulative-sum tiling.** To mark every time bin within ±Δt of any spike, the standard approach applies a sliding window — effectively a convolution — which requires iterating over each bin. Instead, `faststtc` uses a cumulative-sum trick: compute the running total of spike counts, then subtract two offset copies of it. The result is a binary "tiled" matrix (one row per unit) that marks every bin covered by at least one spike window, computed in a single vectorised pass with no Python loops.
-
-2. **Matrix multiply for all coincidences.** Once the tiled matrix is built, the number of spikes from unit A that fall inside the tiles of unit B is simply the dot product of A's spike row with B's tile row. Doing this for all N² pairs simultaneously is a single matrix multiply (`spike_matrix @ tiled_matrix.T`), which NumPy hands off to a highly optimised BLAS routine. This replaces an explicit double loop over pairs.
-
-The null distribution (surrogate spike trains for statistical testing) uses a further optimisation: because the tiled version of the *original* signal does not change across surrogate iterations, it is computed once before the loop rather than once per iteration. This idea was inspired by [STTCPy](https://github.com/jeremi-chabros/STTCPy), which introduced the same hoisting strategy; `faststtc` extends it to the full vectorised setting.
-
-The core algorithm was originally written in MATLAB. It has since been translated to Python, restructured as an installable package, and optimised with the help of Claude (Anthropic).
-
----
-
 ### Citation
 
 If you use this package, please cite the original STTC paper:

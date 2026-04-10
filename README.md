@@ -1,5 +1,7 @@
 # faststtc — Fast Spike Time Tiling Coefficient for Python
 
+<img src="fastSTTC.png" align="left" width="320" alt="iSTTC logo" />
+
 A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficient (STTC) for neural spike train data.
 
 ---

@@ -1,17 +1,17 @@
 # fastSTTC — Fast Spike Time Tiling Coefficient for Python
 
-<img src="fastSTTC.png" align="left" width="320" alt="iSTTC logo" />
+<img src="fastSTTC.png" align="left" width="300" alt="iSTTC logo" />
 
 A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficient (STTC) for neural spike train data.
 
-## What is STTC?
+### What is STTC?
 
 STTC is a measure of how often two neurons fire close together in time. It produces a number between −1 and +1: a value near 0 means the two neurons fire independently (no more than expected by chance given their individual firing rates), 
 a positive value means they tend to fire together, and a negative value means they tend to avoid firing at the same time. Unlike older measures such as the correlation index, STTC does not depend on firing rate — 
 two neurons that both fire very rarely will not appear correlated simply because they share many silent periods. STTC was introduced by Cutts & Eglen (J. Neurosci., 2014) and has 
 become a very widely used measure of pairwise spike train interactions.
 
-## Why use this package?
+### Why use this package?
 
 - **2–9× faster** than existing NumPy implementations for short recordings (≤ 30,000 ms)
 - **1.7–2.7× faster** for long recordings (≥ 300,000 ms, 5 minutes at 1 ms bins)
@@ -21,7 +21,7 @@ become a very widely used measure of pairwise spike train interactions.
 
 ---
 
-## How it works — and why it is fast
+### How it works — and why it is fast
 
 Most STTC implementations work by looping over every pair of units (i, j) and, for each pair, looping over every spike to count how many fall within the time window of the other unit. 
 This is slow because the work scales with the number of pairs (N²) and the number of spikes, and Python loops are expensive.
@@ -42,7 +42,7 @@ I wrote (many years ago) the core algorithm in MATLAB. It has since been transla
 
 ---
 
-## Installation
+### Installation
 
 ```bash
 pip install faststtc
@@ -58,9 +58,9 @@ pip install -e ".[dev]"
 
 ---
 
-## Quick start
+### Quick start
 
-### Example 1: Pairwise STTC
+#### Example 1: Pairwise STTC
 
 ```python
 import faststtc as ft
@@ -73,14 +73,14 @@ S = ft.sttc(spike_matrix, dt_values=50)   # Δt = 50 ms
 print(S)   # (N × N) matrix
 ```
 
-### Example 2: Is the correlation statistically significant?
+#### Example 2: Is the correlation statistically significant?
 
 ```python
 z = ft.zscore_sttc(spike_matrix, dt=50, n_shifts=200)
 # z[i,j] > 3  →  units i and j co-fire significantly more than chance
 ```
 
-### Example 3: Compute STTC at multiple time windows
+#### Example 3: Compute STTC at multiple time windows
 
 ```python
 S = ft.sttc(spike_matrix, dt_values=[10, 25, 50, 100])
@@ -89,7 +89,7 @@ S = ft.sttc(spike_matrix, dt_values=[10, 25, 50, 100])
 
 ---
 
-## Data format
+### Data format
 
 Understanding the data format is the most common source of confusion for new users:
 
@@ -99,19 +99,19 @@ Understanding the data format is the most common source of confusion for new use
 
 ---
 
-## Choosing Δt
+### Choosing Δt
 
 The half-window `dt` determines how close two spikes must be in time to count as co-firing. For multi-electrode array recordings of retinal waves or cortical activity, `dt = 50 ms` is a common default. For studies of spike-timing-dependent plasticity, 10–20 ms is typical. You can pass a list to `sttc()` to compute at multiple values in a single call, which is more efficient than calling `sttc()` multiple times.
 
 ---
 
-## Choosing `n_shifts` for the null distribution
+### Choosing `n_shifts` for the null distribution
 
 `n_shifts=200` (the default) is sufficient for exploratory analysis. Use `n_shifts >= 500` for results intended for publication to ensure the null distribution is well sampled.
 
 ---
 
-## How it works — and why it is fast
+### How it works — and why it is fast
 
 Most STTC implementations work by looping over every pair of units (i, j) and, for each pair, looping over every spike to count how many fall within the time window of the other unit. This is slow because the work scales with the number of pairs (N²) and the number of spikes, and Python loops are expensive.
 
@@ -127,7 +127,7 @@ The core algorithm was originally written in MATLAB. It has since been translate
 
 ---
 
-## Citation
+### Citation
 
 If you use this package, please cite the original STTC paper:
 
@@ -135,6 +135,6 @@ If you use this package, please cite the original STTC paper:
 
 ---
 
-## License
+### License
 
 MIT

@@ -1,12 +1,8 @@
-# faststtc — Fast Spike Time Tiling Coefficient for Python
+# fastSTTC — Fast Spike Time Tiling Coefficient for Python
 
 <img src="fastSTTC.png" align="left" width="320" alt="iSTTC logo" />
 
 A fast, easy-to-use Python package for computing the Spike Time Tiling Coefficient (STTC) for neural spike train data.
-
-<br clear="left">
-
----
 
 ## What is STTC?
 
@@ -14,8 +10,6 @@ STTC is a measure of how often two neurons fire close together in time. It produ
 a positive value means they tend to fire together, and a negative value means they tend to avoid firing at the same time. Unlike older measures such as the correlation index, STTC does not depend on firing rate — 
 two neurons that both fire very rarely will not appear correlated simply because they share many silent periods. STTC was introduced by Cutts & Eglen (J. Neurosci., 2014) and has 
 become a very widely used measure of pairwise spike train interactions.
-
----
 
 ## Why use this package?
 
